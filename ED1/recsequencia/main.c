@@ -21,4 +21,4 @@ int main(){
     imprimir_sequenciarec(recsec);
 
 
-}
+}  // teste

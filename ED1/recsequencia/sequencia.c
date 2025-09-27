@@ -79,7 +79,7 @@ Sequencia* recupera_sequencia(Sequencia* s){
     while(noatual != NULL){
 
         inserir_final(recsec, noatual->valor, noatual->id, noatual->prox_id);
-        noatual = buscaporid(s, noatual->prox_id);
+        noatual = buscaporid(s, noatual->prox_id); //teste
 
     }
     return recsec;

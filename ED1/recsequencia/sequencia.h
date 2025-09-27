@@ -11,4 +11,4 @@ int imprimir_sequencia(Sequencia* s);
 int imprimir_sequenciarec(Sequencia* s);
 
 
-#endif 
+#endif // teste
