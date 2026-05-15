@@ -11,5 +11,6 @@ Lista* codifica_listabinaria(Lista* l);
 Lista* decodifica_listabinaria(Lista* l);
 void imprimir_listacod(Lista* l);
 void imprimir_listadec(Lista* l);
+void preencher_lista(Lista* l);
 
 #endif //LISTA_H

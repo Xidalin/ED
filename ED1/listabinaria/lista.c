@@ -77,7 +77,7 @@ void imprimir_listadec(Lista* l) {
 
     no* aux = l->inicio;
     while (aux != NULL) {
-        printf("%d ", aux->info1);
+        printf("%d", aux->info1);
         aux = aux->prox;
     }
     printf("\n");
@@ -103,7 +103,6 @@ Lista* codifica_listabinaria(Lista* l) {
         inserir_finaldec(cod, digito_atual, contagem);
     }
     
-    // Não se esqueça de retornar a lista criada!
     return cod;
 }
 Lista* decodifica_listabinaria(Lista* l){
@@ -123,4 +122,14 @@ Lista* decodifica_listabinaria(Lista* l){
         aux = aux->prox;
     }
     return dec;
+}
+void preencher_lista(Lista* l){
+    char entrada[10000];
+    printf("Digite a sequencia binaria\n");
+    scanf("%10000s", entrada);
+
+    for(int i = 0; entrada[i] != '\0'; i++){
+        int digito = entrada[i] - '0';
+        inserir_final(l, digito);
+    }
 }

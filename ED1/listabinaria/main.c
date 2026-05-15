@@ -3,7 +3,6 @@
 
 int main(){
     
-    //verificação do modo operacional do programa "c" "d" (codificação ou decodificação)
     printf("Digite 'c' para codificar ou 'd' para decodificar: \n");
     char modo;
     scanf(" %c", &modo);
@@ -14,14 +13,7 @@ int main(){
     if (modo == 'c'){
         Lista* lbin = cria_lista();
 
-        int num;
-        do{
-            printf("Digite um numero entre 0 e 1:\n");
-            scanf("%d", &num);
-            if( num != 0 && num != 1) break;
-            inserir_final(lbin, num);
-        }while ( num == 0 || num == 1);
-
+        preencher_lista(lbin);
         lbin = codifica_listabinaria(lbin);
         printf("Lista codificada: \n");
         imprimir_listacod(lbin);
