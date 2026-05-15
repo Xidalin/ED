@@ -14,15 +14,6 @@ typedef struct _no{
     short h;
 }No;
 
-BinTree* BTcreate(){
-    BinTree* novo = malloc(sizeof(BinTree));
-    if (novo != NULL){
-        novo->root = NULL;
-    }
-
-    return novo;
-
-}
 
 RBtree* RBcreate(){
     RBtree* novo = malloc(sizeof(RBtree));
@@ -64,35 +55,6 @@ static void rbPintar(No* n, Color cor) {
     }
 }
 
-bool BTinsert(BinTree* t, int key){
-
-    No* novo = criarNo(key);
-
-    No* y = NULL;
-    No* x = t->root;
-
-    while (x != NULL){
-        y = x;
-        if( key < x->key){
-            x = x->left;
-        }else{
-            x = x->rgt;
-        }
-
-    }
-    novo->p = y;
-    if (y == NULL) {
-        t->root = novo; 
-    } else if (key < y->key) {
-        y->left = novo; 
-    } else {
-        y->rgt = novo;  
-    }
-
-    return true;
-
-}
-
 void Transplant(BinTree* t, No* u, No* v){
     if (u->p == NULL){ // se o no a ser transplantado eh a raiz
         t->root = v;
@@ -103,31 +65,6 @@ void Transplant(BinTree* t, No* u, No* v){
         v->p = u->p;
     }
 }
-
-/*bool Tree_delete(BinTree* t, No* z){
-    if (t == NULL || z == NULL) return false;
-    if(z->left == NULL){
-        Transplant(t, z, z->rgt);
-    }else if (z->rgt == NULL){
-        Transplant(t, z, z->left);
-    }
-    else {
-
-        No* y = BTmin(z->rgt);
-        if( y->p != z){
-            Transplant(t, y, y->rgt);
-            y->rgt = z->rgt;
-            y->rgt->p = y;
-        }
-        Transplant(t, z, y);
-        y->left = z->left;
-        y->left->p = y;
-
-    }
-
-    free(z);
-    return true;
-}*/
 
 bool ehSentinela(No* n) {
     return n != NULL && n->left == n && n->rgt == n && n->p == n;
@@ -177,57 +114,6 @@ int BTnodeKey(No* n){
     if (n == NULL || ehSentinela(n)) return 0;
     return n->key;
 }
-
-static void pularEspacos(const char* str, int* pos) {
-    while (str[*pos] != '\0' && isspace((unsigned char)str[*pos])) {
-        (*pos)++;
-    }
-}
-
-No* lerArvore(char* str, int* pos) {
-    pularEspacos(str, pos);
-
-    if (str[*pos] != '(') return NULL;
-
-    (*pos)++; // Pula o '('
-    pularEspacos(str, pos);
-
-    if (str[*pos] == ')') { // No vazio: ()
-        (*pos)++;
-        return NULL;
-    }
-
-    char* fim = NULL;
-    long valor = strtol(&str[*pos], &fim, 10);
-    if (fim == &str[*pos]) return NULL;
-
-    *pos = (int)(fim - str);
-
-    No* novo = criarNo((int)valor);
-    if (novo == NULL) return NULL;
-
-    pularEspacos(str, pos);
-
-    if (str[*pos] == '(') {
-        novo->left = lerArvore(str, pos);
-        if (novo->left != NULL) novo->left->p = novo;
-
-        pularEspacos(str, pos);
-
-        if (str[*pos] == '(') {
-            novo->rgt = lerArvore(str, pos);
-            if (novo->rgt != NULL) novo->rgt->p = novo;
-        }
-    }
-
-    pularEspacos(str, pos);
-    if (str[*pos] == ')') {
-        (*pos)++; // Pula o ')' do no atual
-    }
-
-    return novo;
-}
-
 int BTaltura(No* n) {
     if (n == NULL || ehSentinela(n)) return -1;  // árvore vazia = -1 (altura em arestas)
     int hEsq = BTaltura(n->left);
@@ -237,93 +123,6 @@ int BTaltura(No* n) {
 
 short alturaNo (No* n){
     if (n == NULL || ehSentinela(n)) return -1; else return n->h;
-}
-
-short verfbalance (No* n){
-    if(n){
-        return (alturaNo(n->left) - alturaNo(n->rgt));
-    }else return 0;
-}
-
-No* rotacaoEsq (BinTree* t, No* r){
-    t->rotacoes++;
-    No *y, *f;
-
-    if (r == NULL || r->rgt == NULL) return r;
-
-    y = r->rgt;
-    f = y->left;
-
-    y->left = r;
-    r->rgt = f;
-
-    y->p = r->p;
-    r->p = y;
-    if (f != NULL) f->p = r;
-
-    r->h = BTaltura(r);
-    y->h = BTaltura(y);
-
-    return y;
-
-}
-
-No* rotacaoRgt (BinTree* t, No* r){
-    t->rotacoes++;
-    No *y, *f;
-
-    if (r == NULL || r->left == NULL) return r;
-
-    y = r->left;
-    f = y->rgt;
-
-    y->rgt = r;
-    r->left = f;
-
-    y->p = r->p;
-    r->p = y;
-    if (f != NULL) f->p = r;
-
-    r->h = BTaltura(r);
-    y->h = BTaltura(y);
-
-    return y;
-
-}
-
-No* rotacaoEsqDir (BinTree* t, No* r){
-    r->left = rotacaoEsq(t, r->left);
-    return rotacaoRgt(t, r);
-}
-
-No* rotacaoDirEsq(BinTree* t, No* r){
-    r->rgt = rotacaoRgt(t, r->rgt);
-    return rotacaoEsq(t, r);
-}
-
-bool inOrderbst(No* no, int* prev){
-    if( no == NULL || ehSentinela(no)) return true;
-
-    if(!inOrderbst(no->left, prev)) return false;
-
-    printf("%d ", no->key);
-
-    if(*prev >= no->key){
-        printf("\n");
-        printf("%d >= %d, nao pode\n", *prev, no->key);
-        return false;
-    }
-
-    *prev = no->key;
-
-    return inOrderbst(no->rgt, prev);
-}
-
-bool isbst (No* root){
-    int prev = INT_MIN;
-    return inOrderbst(root, &prev);
-
-
 }
 
 static void rbRotacaoEsq(RBtree* t, No* x){
@@ -366,83 +165,6 @@ static void rbRotacaoRgt(RBtree* t, No* x){
 
     y->rgt = x;
     x->p = y;
-}
-
-No* balanceamento (BinTree* t, No* r){
-    short fb = verfbalance(r);
-
-    if (fb < -1 && verfbalance(r->rgt) <= 0){
-        r = rotacaoEsq(t, r);
-    }else if (fb > 1 && verfbalance(r->left) >= 0){
-        r = rotacaoRgt(t, r); 
-    }else if (fb < -1 && verfbalance(r->rgt) > 0){
-       r = rotacaoDirEsq(t, r);
-    }else if (fb > 1 && verfbalance(r->left) < 0){
-        r = rotacaoEsqDir(t, r);
-    }
-
-    return r;
-}
-
-No* insertAVL(BinTree*t, No *r, int x){
-    if(r == NULL) 
-        return criarNo(x);
-    else{ // inserção será à esquerda ou à direita
-        if(x < r->key)
-            r->left = insertAVL(t, r->left, x);
-        else if(x > r->key)
-            r->rgt = insertAVL(t, r->rgt, x);
-        else
-            printf("\nnao deu pra inserir dog\nO elemento %d a existe\n", x);
-    }
-    r->h = BTaltura(r);
-    // verifica a necessidade de rebalancear a árvore
-    r = balanceamento(t, r);
-    return r;
-}
-
-No* removeAVL (BinTree* t, No* r, int x){
-    if (r == NULL) {
-        return NULL;
-    }else {
-        if (r->key == x){
-            if (r->left == NULL && r->rgt == NULL){
-                free(r);
-                printf("\nnó folha removido pae\n");
-                return NULL;
-            }
-        else { //o nó tem dois boneco xx
-
-            if( r->left != NULL && r->rgt != NULL){
-                No* aux = r->left;
-                while(aux->rgt != NULL){ // maior valor da sub arvore a esquerda   (predecessor direto)
-                    aux = aux->rgt;
-                }
-                r->key = aux->key;
-                aux->key = x;
-                printf("Elemento trocado: %d !\n", x);
-                r->left = removeAVL(t, r->left, x);
-            }
-            else if (r->left != NULL){
-                No* aux = r->left;
-                free(r);
-                printf("\nremovemo o no com filho esquerdo\n");
-                return aux;
-            }
-        }
-        }else {
-            if ( x < r->key){
-                r->left = removeAVL(t, r->left, x);
-            } else if ( x > r->key){
-                r->rgt = removeAVL(t, r->rgt, x);
-            }
-        }
-
-        r->h = BTaltura(r);
-        r = balanceamento(t, r);
-
-        return r;
-    }
 }
 
 void RBinsertFixup(RBtree* t, No* z) {
