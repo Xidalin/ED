@@ -10,7 +10,6 @@ typedef struct _no{
     No* left;
     No* rgt;
     No* p;
-    Color color;
     short h;
 }No;
 
@@ -25,29 +24,6 @@ BinTree* BTcreate(){
 
 }
 
-RBtree* RBcreate(){
-    RBtree* novo = malloc(sizeof(RBtree));
-    if (novo == NULL) return NULL;
-
-    novo->nil = malloc(sizeof(No));
-    if (novo->nil == NULL) {
-        free(novo);
-        return NULL;
-    }
-
-    novo->nil->key = 0;
-    novo->nil->left = novo->nil;
-    novo->nil->rgt = novo->nil;
-    novo->nil->p = novo->nil;
-    novo->nil->color = BLACK;
-    novo->nil->h = -1;
-    novo->root = novo->nil;
-    novo->rotacoes = 0;
-    novo->coloracoes = 0;
-
-    return novo;
-}
-
 static No* criarNo(int valor) {
     No* novo = malloc(sizeof(No));
     if (novo == NULL) return NULL;
@@ -59,12 +35,6 @@ static No* criarNo(int valor) {
     novo->color = RED;
     novo->h = 0;
     return novo;
-}
-
-static void rbPintar(No* n, Color cor) {
-    if (n != NULL && n->color != cor) {
-        n->color = cor;
-    }
 }
 
 bool BTinsert(BinTree* t, int key){
@@ -106,31 +76,6 @@ void Transplant(BinTree* t, No* u, No* v){
         v->p = u->p;
     }
 }
-
-/*bool Tree_delete(BinTree* t, No* z){
-    if (t == NULL || z == NULL) return false;
-    if(z->left == NULL){
-        Transplant(t, z, z->rgt);
-    }else if (z->rgt == NULL){
-        Transplant(t, z, z->left);
-    }
-    else {
-
-        No* y = BTmin(z->rgt);
-        if( y->p != z){
-            Transplant(t, y, y->rgt);
-            y->rgt = z->rgt;
-            y->rgt->p = y;
-        }
-        Transplant(t, z, y);
-        y->left = z->left;
-        y->left->p = y;
-
-    }
-
-    free(z);
-    return true;
-}*/
 
 bool ehSentinela(No* n) {
     return n != NULL && n->left == n && n->rgt == n && n->p == n;
@@ -179,56 +124,6 @@ No* BTsearch(No* t, int target){
 int BTnodeKey(No* n){
     if (n == NULL || ehSentinela(n)) return 0;
     return n->key;
-}
-
-static void pularEspacos(const char* str, int* pos) {
-    while (str[*pos] != '\0' && isspace((unsigned char)str[*pos])) {
-        (*pos)++;
-    }
-}
-
-No* lerArvore(char* str, int* pos) {
-    pularEspacos(str, pos);
-
-    if (str[*pos] != '(') return NULL;
-
-    (*pos)++; // Pula o '('
-    pularEspacos(str, pos);
-
-    if (str[*pos] == ')') { // No vazio: ()
-        (*pos)++;
-        return NULL;
-    }
-
-    char* fim = NULL;
-    long valor = strtol(&str[*pos], &fim, 10);
-    if (fim == &str[*pos]) return NULL;
-
-    *pos = (int)(fim - str);
-
-    No* novo = criarNo((int)valor);
-    if (novo == NULL) return NULL;
-
-    pularEspacos(str, pos);
-
-    if (str[*pos] == '(') {
-        novo->left = lerArvore(str, pos);
-        if (novo->left != NULL) novo->left->p = novo;
-
-        pularEspacos(str, pos);
-
-        if (str[*pos] == '(') {
-            novo->rgt = lerArvore(str, pos);
-            if (novo->rgt != NULL) novo->rgt->p = novo;
-        }
-    }
-
-    pularEspacos(str, pos);
-    if (str[*pos] == ')') {
-        (*pos)++; // Pula o ')' do no atual
-    }
-
-    return novo;
 }
 
 int BTaltura(No* n) {
@@ -336,52 +231,6 @@ bool isbst (No* root){
 
 }
 
-static void rbRotacaoEsq(RBtree* t, No* x){
-    No* y = x->rgt;
-    t->rotacoes++;
-    x->rgt = y->left;
-    if (y->left != t->nil) {
-        y->left->p = x;
-    }
-
-    y->p = x->p;
-    if (x->p == t->nil) {
-        t->root = y;
-    } else if (x == x->p->left) {
-        x->p->left = y;
-    } else {
-        x->p->rgt = y;
-    }
-
-    y->left = x;
-    x->p = y;
-    atualizarAltura(x);
-    atualizarAltura(y);
-}
-
-static void rbRotacaoRgt(RBtree* t, No* x){
-    No* y = x->left;
-    t->rotacoes++;
-    x->left = y->rgt;
-    if (y->rgt != t->nil) {
-        y->rgt->p = x;
-    }
-
-    y->p = x->p;
-    if (x->p == t->nil) {
-        t->root = y;
-    } else if (x == x->p->rgt) {
-        x->p->rgt = y;
-    } else {
-        x->p->left = y;
-    }
-
-    y->rgt = x;
-    x->p = y;
-    atualizarAltura(x);
-    atualizarAltura(y);
-}
-
 No* balanceamento (BinTree* t, No* r){
     short fb = verfbalance(r);
 
@@ -414,122 +263,3 @@ No* insertAVL(BinTree*t, No *r, int x){
     r = balanceamento(t, r);
     return r;
 }
-
-No* removeAVL (BinTree* t, No* r, int x){
-    if (r == NULL) {
-        return NULL;
-    }else {
-        if (r->key == x){
-            if (r->left == NULL && r->rgt == NULL){
-                free(r);
-                printf("\nnó folha removido pae\n");
-                return NULL;
-            }
-        else { //o nó tem dois boneco xx
-
-            if( r->left != NULL && r->rgt != NULL){
-                No* aux = r->left;
-                while(aux->rgt != NULL){ // maior valor da sub arvore a esquerda   (predecessor direto)
-                    aux = aux->rgt;
-                }
-                r->key = aux->key;
-                aux->key = x;
-                printf("Elemento trocado: %d !\n", x);
-                r->left = removeAVL(t, r->left, x);
-            }
-            else if (r->left != NULL){
-                No* aux = r->left;
-                free(r);
-                printf("\nremovemo o no com filho esquerdo\n");
-                return aux;
-            }
-        }
-        }else {
-            if ( x < r->key){
-                r->left = removeAVL(t, r->left, x);
-            } else if ( x > r->key){
-                r->rgt = removeAVL(t, r->rgt, x);
-            }
-        }
-
-        atualizarAltura(r);
-        r = balanceamento(t, r);
-
-        return r;
-    }
-}
-
-void RBinsertFixup(RBtree* t, No* z) {
-    while (z->p->color == RED) {
-        if (z->p == z->p->p->left) {
-            No* y = z->p->p->rgt;  // tio
-
-            if (y->color == RED) {
-                rbPintar(z->p, BLACK);  t->coloracoes++;
-                rbPintar(y, BLACK); t->coloracoes++;
-                rbPintar(z->p->p, RED); t->coloracoes++;
-                z = z->p->p;
-            } else {
-                if (z == z->p->rgt) {
-                    z = z->p;
-                    rbRotacaoEsq(t, z);
-                }
-
-                rbPintar(z->p, BLACK);  t->coloracoes++;
-                rbPintar(z->p->p, RED); t->coloracoes++;
-                rbRotacaoRgt(t, z->p->p);
-            }
-        } else {
-            No* y = z->p->p->left;  // tio
-
-            if (y->color == RED) {
-                rbPintar(z->p, BLACK);  t->coloracoes++;
-                rbPintar(y, BLACK); t->coloracoes++;
-                rbPintar(z->p->p, RED); t->coloracoes++;
-                z = z->p->p;
-            } else {
-                if (z == z->p->left) {
-                    z = z->p;
-                    rbRotacaoRgt(t, z);
-                }
-
-                rbPintar(z->p, BLACK);  t->coloracoes++;
-                rbPintar(z->p->p, RED); t->coloracoes++;
-                rbRotacaoEsq(t, z->p->p);
-            }
-        }
-    }
-
-    rbPintar(t->root, BLACK);   t->coloracoes++;
-    t->root->p = t->nil;
-}
-
-bool RBinsert (RBtree* t, int z){
-    No* novo = criarNo(z);
-    if (novo == NULL) return false;
-    
-    No* y = t->nil;
-    No* x = t->root;
-    while (x != t->nil){
-    
-        y = x;
-
-        if (z < x->key) x = x->left;
-        else x = x->rgt;
-    }
-
-    novo->p = y; 
-
-    if (y == t->nil)t->root = novo;
-    else if (z < y->key)y->left = novo;
-    else y->rgt = novo;
-
-    novo->left = t->nil;
-    novo->rgt = t->nil;
-    novo->color = RED;
-
-    RBinsertFixup(t, novo);
-
-    return true;
-}
-
